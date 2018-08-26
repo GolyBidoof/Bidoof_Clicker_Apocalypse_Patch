@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Bidoof 2018 Project</title>
+    <script> 
+        WebFontConfig = {
+            google:{ families: ['Kosugi Maru'] },
+            active: function(){drawOnCanvas();},
+        };
+        (function(){
+        var wf = document.createElement("script");
+        wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js';
+        wf.async = 'true';
+        document.head.appendChild(wf);
+        })();
+   </script>
+  </head>
+  <body>
+    <div style="text-align:center;"><canvas id="mainScreen" width="1200" height="720" style="border:2px solid #454545; font-family:'Kosugi', sans-serif;"></canvas></div>
+    <script src="main.js"></script>
+  </body>
+</html>
