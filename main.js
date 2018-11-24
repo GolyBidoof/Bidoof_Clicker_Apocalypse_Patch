@@ -42,6 +42,8 @@ var substitute;
 var girarina;
 var yamato;
 var yamatobg;
+var sansDeltarune;
+var deltarun;
 var audio;
 var timeRewind;
 var go;
@@ -75,6 +77,17 @@ function drawOnCanvas() {
     yamatobg.src = "yamatobg.png";
     giratina = new Image();
     giratina.src = "Giratina.gif";
+    sansDeltarune = new Array();
+    sansDeltarune[0] = new Image();
+    sansDeltarune[0].src = "SansDeltarune.png";
+    sansDeltarune[1] = new Image();
+    sansDeltarune[1].src = "SansDeltarune2.png";
+    sansDeltarune[2] = new Image();
+    sansDeltarune[2].src = "SansDeltarune3.png";
+    sansDeltarune[3] = new Image();
+    sansDeltarune[3].src = "susie.png";
+    deltarun = new Image();
+    deltarun.src = "deltarun.png";
 
     //https://soundscrate.com/
     audio = new Audio('explosion-sound.mp3');
@@ -98,6 +111,10 @@ function drawOnCanvas() {
     //roblox
     oof = new Audio('oof.mp3');
     oof.loop=false;
+    //Deltarune Lancer
+    lancer = new Audio('lancer.ogg');
+    lancer.volume=0.6;
+
     //keep loading the main loop at 30 frames per second
     mainLoop();
     setInterval(mainLoop, 1000/framerate);
@@ -130,8 +147,17 @@ function canvasClick(e) {
         console.log("GOT IT!");
         buttonsClickable[0] = false;
         buttonsClickable[1] = false;
-        eventNumber++;
+        eventNumberIncrement();
     }
+}
+
+function eventNumberIncrement() {
+    eventNumber++;
+    currentTextNumber=0;
+    lettersProcessed = 0;
+    textAdvancingSpeed = 0.6;
+    textFinishedRendering=false;
+    sfxPlaying=false;
 }
 
 function loadMenu() {
@@ -202,7 +228,7 @@ var sfxPlaying = false;
 function printText(color, text, orientation) {
     
     if (currentTextNumber>=text.length) {
-        eventNumber++;
+        eventNumberIncrement();
         currentTextNumber = 0;
         lettersProcessed = 0;
         return;
@@ -273,7 +299,7 @@ function fadeToColor(color, delay, speed) {
         ctx.fillRect(0, 0, canvas.width, canvas.height); 
         if (ctx.globalAlpha >= 1) {
             fadeTimer=0;
-            eventNumber++;
+            eventNumberIncrement();
         }
     }
 }
@@ -294,7 +320,7 @@ function drawActor(id, image, fadeFlag) {
             }
             if (ctx.globalAlpha >= 1) {
                 actorFadeTimer=0;
-                eventNumber++;
+                eventNumberIncrement();
             }
             ctx.globalAlpha=1;
         }
@@ -306,7 +332,9 @@ function drawActor(id, image, fadeFlag) {
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
         } else {
-            ctx.drawImage(image,canvas.width-350,canvas.height*0.44,image.width*9, image.height*9);
+            if (image==sansDeltarune[0] || image==sansDeltarune[1] || image==sansDeltarune[2]) ctx.drawImage(image,canvas.width-400,canvas.height*0.34,image.width*6, image.height*6);
+            else if (image==sansDeltarune[3]) ctx.drawImage(image,canvas.width-300,canvas.height*0.34,image.width*6, image.height*6);
+            else ctx.drawImage(image,canvas.width-350,canvas.height*0.44,image.width*9, image.height*9);
         }
     }
 }
@@ -326,7 +354,7 @@ function textBoard(color, text, text2) {
     textBoardTimer++;
     if(textBoardTimer>60) {
         textBoardTimer=0;
-        eventNumber++;
+        eventNumberIncrement();
         ctx.textAlign = "left";
     }
 
@@ -445,7 +473,7 @@ var timeoutActive=false;
 function timeout(time) {
     timeoutActive=true;
     setTimeout(function(){ 
-        eventNumber++; 
+        eventNumberIncrement(); 
         timeoutActive = false;
         overtime = false;
         currentTime = 0;
@@ -535,7 +563,7 @@ function useMove() {
     ctx.fillText(text, canvas.width/2 + rand1, canvas.height/2 + rand2);
 
     if (moveTimeout>120) {
-        eventNumber++;
+        eventNumberIncrement();
     }
 }
 
@@ -544,107 +572,201 @@ var unlockedSkills = [0];
 var strengthOfMoves = [0];
 var activeButton = -1;
 
+function easterEgg() {
+    eventNumber=1000;
+    window.removeEventListener("keypress", easterEgg, true);   
+}
+
+function drawBackgrounds(eventNumber) {
+    //white screen transition
+    if (eventNumber==36 || eventNumber==1016) ctx.globalAlpha=1;
+
+    if(eventNumber >= 10 && eventNumber <= 36) {
+        ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
+        ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
+    }
+    else if (eventNumber >= 1001 && eventNumber <= 1002) {
+        ctx.fillStyle = red;
+        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        ctx.save();
+        ctx.rotate(-((new Date().getTime() / 1000)%360) + Math.PI/2.0);
+        ctx.drawImage(swirl,-swirl.width*1.5,-swirl.height*1.5,1280*3,1280*3);
+        ctx.restore();
+    } 
+    else if (eventNumber >= 1003 && eventNumber <= 1016) {
+        ctx.fillStyle = black;
+        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        ctx.drawImage(deltarun,0,0,deltarun.width*2.4,deltarun.height*2.7);
+    }
+
+    //check if it is a Visual Novel sequence, if so, draw Bidoof
+    if (eventNumber >= 1002 && eventNumber <= 1016) {
+        drawActor(0, bidoof, 0);
+    }
+}
+
+var blue = "rgba(20,20,200,1)";
+var black = "rgba(30,30,30,1)";
+var white = "rgba(255,255,255,1)";
+var red = "rgba(200,20,20,1)";
+
+var text = [
+    //0
+    ["NO! YOU CAN'T! STOP, PLEASE!",
+        "*pant* *pant* *pant*",
+        "YOU HAVE NO IDEA WHAT YOU'RE DOING!",
+        "I BEG OF YOU, IT'S NOT ABOUT ME, IT'S ABOU-"],
+    //1    
+    ["t h e   g r o u n d    t r e m b l e s   . . ."],
+    //2
+    ["then the whole world turned to white and nothing remained.",
+        "...",
+        "...",
+        "..."
+    ],
+    //3
+    ["You've really done it this time."],
+    //4
+    ["Though, to be honest, can't say I'm surprised. You're the ultimate moron, after all.",
+    "Who am I doesn't matter at this point.",
+    "What matters is that I know you, and...",
+    "Everyone is dead.",
+    "The humanity is EXTINCT!",
+    "And it's all because of you.",
+    "...",
+    "Worry not, however.",
+    "There is still something I can do with my amazingly amazing skills~",
+    "Using my mystical powers can send you back to one minutes before death!",
+    "Well, it used to be something different, but then the monetary cuts took those three extra minutes from us and they did not even pay us to change 'minutes' back into singular, blah blah blah.",
+    "But hey, it's legit! I-it's definitely not a hoax, trust me!",
+    "Once I will send you one minutes before death... I'll want you to do one thing.",
+    "Prevent this gigantic explosion you've caused and never return back to it again...",
+    "Can I trust you on this?",
+    ".",
+    "..",
+    "...",
+    "....",
+    "Wow, you're amazingly talkative, boi!",
+    "Aw screw this, there's only one way to fix humanity at this point, I'll trust you then!",
+    "Commencing operation... Here... WE... GOOOOOOO~"],
+    //5
+    ["Yamato Perpetual Reactor, one minutes before death."],
+    //6
+    ["Who are you...?",
+    "How dare you even speak to me, you lowlife creature!",
+    "Such a hideous face... Those god-awful fangs... It looks like mighty lord Arceus has forgotten about you.",
+    "Or maybe he still remembers you... grinning to himself!",
+    "Get out of my sight, I don't even want to see you."],
+    //7
+    ["Mighty Giratina, the strongest guardian, and yet he failed to protect the facility from a single rampage Bidoof...",
+    "But no matter what have you done, you're in control of yourself now and I'm sure this disaster won't repeat!",
+    "Please, don't nuke the Yamato Reactor this time. I can cast divine power upon thee to prevent this abnormality.",
+    "Just wait for the right opportunity..."],
+    //8
+    ["NOW! Strike where it hurts!",
+    "Look at the bottom of the screen right now..."],
+    //9
+    ["You've got two buttons, 'Move' and 'Strike!'",
+    "Move is like a Menu screen where you can toggle between different attacks to strike your opponent.",
+    "'Strike!' on the other hand uses that move on an opponent and depending on the attack you have chosen before, can have various side effects.",
+    "For now you don't have any moves yet...",
+    "I mean, besides your teeth...",
+    "So I'm going to grace you with your first move that you're going to use to annihilate Giratina in a way that will, uh...",
+    "...'tire you out'...",
+    "...and that will stop the world from being nuked to oblivion thanks to that Yamato Reactor over there...",
+    "No need to be scared... I think...",
+    "Anyway, there you go!"],
+    //10
+    ["Good enough, this should do. Now head on to the Move menu..."],
+    //11
+    ["See, was it that hard? Time to kick some asses, press 'Okay!' and move to 'Strike!'"],
+    //12
+    ["...what...",
+    "...was...",
+    "...that..."],
+    //13
+    ["OUCH!",
+    "That looked painful...",
+    "Hope he's okay though...",
+    "...",
+    "Oh well, who cares about Bidoofs anyway. Good thing I've stopped the world exploding, heh!",
+    "hehehehe!",
+    "HEHEHEHEHHEHEHEHEHEH!",
+    "HEEEEEEEEEEEHEHEHEH*cough* *cough*",
+    "I shouldn't laugh like a maniac, it's not good for my throat..."],
+
+    //14
+    ["Oh boi, you're clicking your keyboard too much.",
+    "Yes, there was an Easter Egg, though this one only works with devices that use keyboard...",
+    "Anyway...",
+    "...",
+    "I've been looking at the list of Spirits in Smash Ultimate and... Uhh...",
+    "You're not there!",
+    "Haha, you're a laughing stock, man, ahahaha!!!",
+    "Well, I'm not in Smash Ultimate too, but that's besides the point.",
+    "Please ask Sakurai to add us in, man!",
+    "I guess since you've went through all the way to get to this screen you'd like to know who I am, huh?",
+    "Alright, the wish can be granted!",
+    "This is not canon, by the way, so don't feel bad if you find out my true form.",
+    "In order for you to see my true form, I need to add you to a..."],
+
+    //15
+    ["Lancer Fun Gang!",
+    "I'm Sans Deltarune, remember me?"],
+    
+    //16
+    ["It's spelled with a 'L', then an 'a', then 'n', then 's'... Wait, that's hard."],
+    //17
+    ["Does it even remotely matter though???",
+    "Just look it up above the textbox, Szymbar must have written it there!!!",
+    "I've been a part of this game ever since 1996 when the Harry Potter series started..."],
+
+    //18
+    ["Wait, that was Nagini.",
+    "And she wasn't a part of this game.",
+    "yikes.",
+    "Well does it really matter?"],
+    //19
+    ["THING IS!!!",
+    "Me and you make a fun pair together, you know?",
+    "I have a feeling we have a lot in common!"],
+    //20
+    ["Other than not being in Smash Bros..."],
+    //21
+    ["I feel you man, our fates are interwined, methinks."],
+    //22
+    ["Int...wer...tined?",
+    "Intertined?"],
+    //23
+    ["ralsei says it's INTERMINED."],
+    //24
+    ["Ahahaha! That's definitely this!"],
+    //25
+    ["Man it feels good to waste your time here.",
+    "I mean, you've got nothing else to do anyway.",
+    "I think you're dead again...",
+    "What kind of hero you are?",
+    "A hero that constantly dies?",
+    "That's simply depressing..."],
+    //26
+    ["I wish you were at least a tiny bit as cool as I am.",
+    "Then you'd be in every version of Smash Bros, including Project M, Brawlhalla and Pokemon Go too.",
+    "And people would mod you to Garry's Mod, Left Cztery Dead... You know, all the cancerous games."],
+    //27
+    ["So, uh.",
+    "...",
+    ".....",
+    ". . . . .",
+    "yeah thats it see you 2028 bye loser"],
+
+    ];
+
 function mainLoop() {
     if (ctx != undefined) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);       
+        checkAudio();      
+        drawBackgrounds(eventNumber);
 
-        //text colors
-        var blue = "rgba(20,20,200,1)";
-        var black = "rgba(30,30,30,1)";
-        var white = "rgba(255,255,255,1)";
-        var red = "rgba(200,20,20,1)";
-        
-        checkAudio();
-
-        
-
-        //text demo
-        var text = [
-            //0
-            ["NO! YOU CAN'T! STOP, PLEASE!",
-                "*pant* *pant* *pant*",
-                "YOU HAVE NO IDEA WHAT YOU'RE DOING!",
-                "I BEG OF YOU, IT'S NOT ABOUT ME, IT'S ABOU-"],
-            //1    
-            ["t h e   g r o u n d    t r e m b l e s   . . ."],
-            //2
-            ["then the whole world turned to white and nothing remained.",
-                "...",
-                "...",
-                "..."
-            ],
-            //3
-            ["You've really done it this time."],
-            //4
-            ["Though, to be honest, can't say I'm surprised. You're the ultimate moron, after all.",
-            "Who am I doesn't matter at this point.",
-            "What matters is that I know you, and...",
-            "Everyone is dead.",
-            "The humanity is EXTINCT!",
-            "And it's all because of you.",
-            "...",
-            "Worry not, however.",
-            "There is still something I can do with my amazingly amazing skills~",
-            "Using my mystical powers can send you back to one minutes before death!",
-            "Well, it used to be something different, but then the monetary cuts took those three extra minutes from us and they did not even pay us to change 'minutes' back into singular, blah blah blah.",
-            "But hey, it's legit! I-it's definitely not a hoax, trust me!",
-            "Once I will send you one minutes before death... I'll want you to do one thing.",
-            "Prevent this gigantic explosion you've caused and never return back to it again...",
-            "Can I trust you on this?",
-            ".",
-            "..",
-            "...",
-            "....",
-            "Wow, you're amazingly talkative, boi!",
-            "Aw screw this, there's only one way to fix humanity at this point, I'll trust you then!",
-            "Commencing operation... Here... WE... GOOOOOOO~"],
-            //5
-            ["Yamato Perpetual Reactor, one minutes before death."],
-            //6
-            ["Who are you...?",
-            "How dare you even speak to me, you lowlife creature!",
-            "Such a hideous face... Those god-awful fangs... It looks like mighty lord Arceus has forgotten about you.",
-            "Or maybe he still remembers you... grinning to himself!",
-            "Get out of my sight, I don't even want to see you."],
-            //7
-            ["Mighty Giratina, the strongest guardian, and yet he failed to protect the facility from a single rampage Bidoof...",
-            "But no matter what have you done, you're in control of yourself now and I'm sure this disaster won't repeat!",
-            "Please, don't nuke the Yamato Reactor this time. I can cast divine power upon thee to prevent this abnormality.",
-            "Just wait for the right opportunity..."],
-            //8
-            ["NOW! Strike where it hurts!",
-            "Look at the bottom of the screen right now..."],
-            //9
-            ["You've got two buttons, 'Move' and 'Strike!'",
-            "Move is like a Menu screen where you can toggle between different attacks to strike your opponent.",
-            "'Strike!' on the other hand uses that move on an opponent and depending on the attack you have chosen before, can have various side effects.",
-            "For now you don't have any moves yet...",
-            "I mean, besides your teeth...",
-            "So I'm going to grace you with your first move that you're going to use to annihilate Giratina in a way that will, uh...",
-            "...'tire you out'...",
-            "...and that will stop the world from being nuked to oblivion thanks to that Yamato Reactor over there...",
-            "No need to be scared... I think...",
-            "Anyway, there you go!"],
-            //10
-            ["Good enough, this should do. Now head on to the Move menu..."],
-            //11
-            ["See, was it that hard? Time to kick some asses, press 'Okay!' and move to 'Strike!'"],
-            //12
-            ["...what...",
-            "...was...",
-            "...that..."],
-            //13
-            ["OUCH!",
-            "That looked painful...",
-            "Hope he's okay though...",
-            "...",
-            "Oh well, who cares about Bidoofs anyway. Good thing I've stopped the world exploding, heh!",
-            "hehehehe!",
-            "HEHEHEHEHHEHEHEHEHEH!",
-            "HEEEEEEEEEEEHEHEHEH*cough* *cough*",
-            "I shouldn't laugh like a maniac, it's not good for my throat..."],
-
-            ];
         switch(eventNumber) {
             case 0:
                 //background color
@@ -733,21 +855,15 @@ function mainLoop() {
             case 10:
                 if(chasers.paused) chasers.play();
                 fadeToColor(black, 0, 0.03);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 break;
             case 11:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 printText(blue,text[5], 1);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 break;
             case 12:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 printText(black,text[6], 1);
@@ -755,14 +871,10 @@ function mainLoop() {
                 break;
             case 13:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 break;
             case 14:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 printText(black, text[7], 1);
@@ -770,28 +882,20 @@ function mainLoop() {
                 break;
             case 14:
                 if (!timeoutActive) timeout(1500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*0.7, 380, 0);
                 break;
             case 15:
                 if (!timeoutActive) timeout(3000);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 moveOverworld(giratina, canvas.width*0.7, 380, 0, canvas.width*0.8, 2200);
                 break;
             case 16:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 break;
             case 17:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 printText(black, text[8], 1);
@@ -799,15 +903,11 @@ function mainLoop() {
                 break;
             case 18:
                 if (!timeoutActive) timeout(1000);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 drawHUD(0);
                 break;
             case 19:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 drawHUD(0);
@@ -817,8 +917,6 @@ function mainLoop() {
             case 20:
                 chasers.pause();
                 if(fanfare.paused) fanfare.play();
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 drawHUD(0);
@@ -827,8 +925,6 @@ function mainLoop() {
             case 21:
                 fanfare.pause();
                 if(chasers.paused) chasers.play();
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 drawHUD(0);
@@ -836,8 +932,6 @@ function mainLoop() {
                 textBlob("???",0,1);
                 break;
             case 22:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 drawHUD(1);
@@ -849,8 +943,6 @@ function mainLoop() {
                 }
                 break;
             case 23:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 buttonsClickable[0]=false;
@@ -864,30 +956,22 @@ function mainLoop() {
                 }
                 break;
             case 24:
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.2, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 useMove();
                 break;
             case 25:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 moveOverworld(bidoof, canvas.width*0.2, 550, 1, canvas.width*0.205, 500);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 break;
             case 26:
                 if (!timeoutActive) timeout(1500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 break;
             case 27:
                 if(chasers.paused) chasers.play();
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 drawOverworld(giratina, canvas.width*0.8, 380, 0);
                 printText(black, text[12], 1);
@@ -895,29 +979,21 @@ function mainLoop() {
                 break;
             case 28:
                 if (!timeoutActive) timeout(1500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 drawOverworld(giratina, canvas.width*0.8, 380, 0);
                 break;
             case 29:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 drawOverworld(giratina, canvas.width*1.1, 380, 1);
                 break;
             case 30:
                 if (!timeoutActive) timeout(1000);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 moveOverworld(giratina, canvas.width*1.1, 380, 1, canvas.width*1.5, 1000);
                 break;
             case 31:
                 if (!timeoutActive) timeout(250);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(bidoof, canvas.width*0.205, 550, 1);
                 moveOverworld(giratina, canvas.width*1.5, 380, 0, canvas.width*0.1, 250);
                 break;
@@ -927,29 +1003,21 @@ function mainLoop() {
                     oof.play();
                 }
                 if (!timeoutActive) timeout(800);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 moveOverworld(bidoof, canvas.width*0.205, 550, 1, canvas.width*(-0.5),500);
                 drawOverworld(giratina, canvas.width*0.1, 380, 0);
                 break;
             case 33:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(giratina, canvas.width*0.1, 380, 0);
                 break;
             case 34:
                 chasers.pause();
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(giratina, canvas.width*0.1, 380, 0);
                 printText(black, text[13], 1);
                 textBlob("???",0,1);
                 break;
             case 35:
                 if (!timeoutActive) timeout(500);
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(giratina, canvas.width*0.1, 380, 0);
                 break;
             case 36:
@@ -958,16 +1026,112 @@ function mainLoop() {
                     go.play();
                 }
                 ctx.globalAlpha=1;
-                ctx.drawImage(yamatobg, 0,0, canvas.width, canvas.height);
-                ctx.drawImage(yamato,canvas.width/2-417,canvas.height-740,yamato.width*2, yamato.height*2);
                 drawOverworld(giratina, canvas.width*0.1, 380, 0);
                 fadeToColor(white, 10, 0.02);
                 break;
             case 37:
                 textBoard(black, "bidoof clicker: apocalypse edition","coming eventually");
+                window.addEventListener("keypress", easterEgg, false );
+                break;
+            case 1000:
+                ctx.globalAlpha = 0;
+                fadeToColor(red, 10, 0.01);
+                ctx.save();
+                ctx.globalAlpha=fadeTimer/110;
+                ctx.rotate(-((new Date().getTime() / 1000)%360) + Math.PI/2.0);
+                ctx.drawImage(swirl,-swirl.width*1.5,-swirl.height*1.5,1280*3,1280*3);
+                ctx.restore();
+                break;
+            case 1001: 
+                actorFadeTimer++;
+                drawActor(0, bidoof, 1);
+                drawActor(1, substitute, 1);
+                break;
+            case 1002:
+                drawActor(1, substitute, 0);
+                textBlob("???", 1, 0);
+                printText(black, text[14], 0);
+                break;
+            case 1003:
+                drawActor(1, sansDeltarune[0], 0);
+                textBlob("Lancer", 1, 0);
+                if (lancer.paused) lancer.play();
+                printText(black, text[15], 0);
+                break;
+            case 1004:
+                drawActor(1, sansDeltarune[1], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[16], 0);
+                break;
+            case 1005:
+                drawActor(1, sansDeltarune[2], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[17], 0);
+                break;
+            case 1006:
+                drawActor(1, sansDeltarune[0], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[18], 0);
+                break;
+            case 1007:
+                drawActor(1, sansDeltarune[2], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[19], 0);
+                break;
+            case 1008:
+                drawActor(1, sansDeltarune[1], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[20], 0);
+                break;
+            case 1009:
+                drawActor(1, sansDeltarune[2], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[21], 0);
+                break;
+            case 1010:
+                drawActor(1, sansDeltarune[1], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[22], 0);
+                break;
+            case 1011:
+                drawActor(1, sansDeltarune[1], 0);
+                drawActor(1, sansDeltarune[3], 0);
+                textBlob("Susie", 1, 0);
+                printText(black, text[23], 0);
+                break;
+            case 1012:
+                drawActor(1, sansDeltarune[0], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[24], 0);
+                break;
+            case 1013:
+                drawActor(1, sansDeltarune[1], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[25], 0);
+                break;
+            case 1014:
+                drawActor(1, sansDeltarune[0], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[26], 0);
+                break;
+            case 1015:
+                drawActor(1, sansDeltarune[2], 0);
+                textBlob("Lancer", 1, 0);
+                printText(black, text[27], 0);
+                break;
+            case 1016:
+                lancer.pause();
+                if (go.paused) {
+                    go.currentTime=0;
+                    go.play();
+                }
+                ctx.globalAlpha=1;
+                drawActor(1, sansDeltarune[2], 0); 
+                fadeToColor(white, 10, 0.02);
+                break;
+            case 1017:
+                textBoard(black, "bidoof clicker: apocalypse edition 2","coming possibly never let it die plz");
                 break;
         }
-        
-
     }
 }
