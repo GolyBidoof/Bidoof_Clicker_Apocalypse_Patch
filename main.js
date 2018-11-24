@@ -124,7 +124,6 @@ var buttonsClickable = [false, false];
 var drawMenu = false;
 function canvasClick(e) {
     //speeding up the dialog drawing speed when clicked
-    console.log('click: ' + e.offsetX + '/' + e.offsetY);
     textAdvancingSpeed = 6.3;
 
     //When the text is finished drawing and you click on the screen, load next text
@@ -138,13 +137,11 @@ function canvasClick(e) {
     
     //ctx.roundRect(canvas.width/2 - 150, canvas.height-60 + initiateFrames*10, 140, 50, 2);
     if(buttonsClickable[0] && e.offsetX>canvas.width/2 - 150 && e.offsetX<canvas.width/2 - 10 && e.offsetY>canvas.height - 60 && e.offsetY<canvas.height-10) {
-        console.log("GOT IT!");
         buttonsClickable[0] = false;
         buttonsClickable[1] = false;
         drawMenu = true;
     }
     if(buttonsClickable[1] && e.offsetX>canvas.width/2 + 10 && e.offsetX<canvas.width/2 + 150 && e.offsetY>canvas.height - 60 && e.offsetY<canvas.height-10) {
-        console.log("GOT IT!");
         buttonsClickable[0] = false;
         buttonsClickable[1] = false;
         eventNumberIncrement();
@@ -175,7 +172,6 @@ function loadMenu() {
         else {
             canvas.addEventListener("click", function (e) {
                 if(e.offsetX>canvas.width*0.305 && e.offsetX<canvas.width*(0.305+0.39) && e.offsetY>canvas.height*(0.3+0.090+drawnButtons*(0.075)) && e.offsetY<canvas.height*(0.3+0.090+drawnButtons*(0.075)+0.07)) {
-                    console.log("Clicked the correct button");
                     activeButton=i-1;
                 }
             }, false);
@@ -278,7 +274,6 @@ function printText(color, text, orientation) {
         if (lettersProcessed > currentText.length) {
             textFinishedRendering = true;
         }
-        console.log(lettersProcessed + " " + currentText.length)
 
     //if finished printing, just print it all
     } else {
@@ -527,9 +522,7 @@ function pulse(baseColorR, baseColorG, baseColorB) {
     if (pulseIntensity<-50) reversePulseing = false;
     if (!reversePulseing) pulseIntensity++;
     else pulseIntensity--;
-    //console.log("rgba(" + parseInt(baseColorR+(pulseIntensity)) +"," + parseInt(baseColorG+(pulseIntensity)) +"," + parseInt(baseColorB+(pulseIntensity)) + ")");
     return "rgba(" + parseInt(baseColorR+(pulseIntensity)) +"," + parseInt(baseColorG+(pulseIntensity)) +"," + parseInt(baseColorB+(pulseIntensity)) + ")"; 
-
 }
 
 function unlockSkill (id) {
